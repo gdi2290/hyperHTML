@@ -722,6 +722,22 @@ tressa.async(function (done) {
     }, 10);
   }, 10);
 });})
+.then(function () {
+  tressa.log('## hyper(...)');
+  var hyper = hyperHTML.hyper;
+  tressa.assert(typeof hyper() === 'function', 'empty hyper() is a wire tag');
+  tressa.assert((hyper`abc`).textContent === 'abc', 'hyper`abc`');
+  tressa.assert((hyper`<p>a${2}c</p>`).textContent === 'a2c', 'hyper`<p>a${2}c</p>`');
+  tressa.assert((hyper(document.createElement('div'))`abc`).textContent === 'abc', 'hyper(div)`abc`');
+  tressa.assert((hyper(document.createElement('div'))`a${'b'}c`).textContent === 'abc', 'hyper(div)`a${"b"}c`');
+  // WFT jsdom ?!
+  delete Object.prototype.nodeType;
+  tressa.assert((hyper({})`abc`).textContent === 'abc', 'hyper({})`abc`');
+  tressa.assert((hyper({})`<p>a${'b'}c</p>`).textContent === 'abc', 'hyper({})`<p>a${\'b\'}c</p>`');
+  tressa.assert((hyper({}, ':id')`abc`).textContent === 'abc', 'hyper({}, \':id\')`abc`');
+  tressa.assert((hyper({}, ':id')`<p>a${'b'}c</p>`).textContent === 'abc', 'hyper({}, \':id\')`<p>a${\'b\'}c</p>`');
+  tressa.assert((hyper('svg')`<rect />`), 'hyper("svg")`<rect />`');
+})
 // */
 .then(function () {
   if (!tressa.exitCode) {

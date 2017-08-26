@@ -44,15 +44,38 @@ var hyperHTML = (function (globalDocument) {'use strict';
     return html.replace(reEscape, fnEscape);
   };
 
+  // hyper(HTML) => automatic bind or wire
+  hyperHTML.hyper = function hyper(HTML) {
+    switch (arguments.length) {
+      case 0:
+      case 1:   return HTML == null ?
+                  wireContent('html') :
+                  (typeof HTML === 'string' ?
+                    wire(null, HTML) :
+                    ('raw' in HTML ?
+                      wireContent('html')(HTML) :
+                      ('nodeType' in HTML ?
+                        hyperHTML.bind(HTML) :
+                        wireWeakly(HTML, 'html')
+                      )
+                    )
+                  );
+      default:  return ('raw' in HTML ?
+                  wireContent('html') : wire
+                ).apply(null, arguments);
+    }
+  };
+
   // hyperHTML.wire(obj, 'type:ID') ➰
-  hyperHTML.wire = function wire(obj, type) {
+  hyperHTML.wire = wire;
+  function wire(obj, type) {
     return arguments.length < 1 ?
       wireContent('html') :
       (obj == null ?
         wireContent(type || 'html') :
         wireWeakly(obj, type || 'html')
       );
-  };
+  }
 
   // - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -841,7 +864,7 @@ var hyperHTML = (function (globalDocument) {'use strict';
 
   // redefine bind to always point at hyperHTML
   // (useful in destructuring)
-  hyperHTML.bind = function (context) {
+  hyperHTML.bind = function bind(context) {
     return function () {
       return hyperHTML.apply(context, arguments);
     };
